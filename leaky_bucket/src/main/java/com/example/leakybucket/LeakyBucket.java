@@ -15,15 +15,15 @@ public class LeakyBucket {
         bucket = new LinkedBlockingQueue<>(capacity);
         this.REQUESTSTOPROCESS = 1;
         this.INTERVALBETWEENLEAK = 1; //in milliseconds
-        if(rate<=UNIT_TIME) {
-            INTERVALBETWEENLEAK = UNIT_TIME/rate; //In this case requestsToProcess == 1 request per leak
+        if (rate <= UNIT_TIME) {
+            INTERVALBETWEENLEAK = UNIT_TIME / rate; //In this case requestsToProcess == 1 request per leak
         } else {
-            REQUESTSTOPROCESS = rate/UNIT_TIME; //In this case intervalToleak == 1 milliseconds
+            REQUESTSTOPROCESS = rate / UNIT_TIME; //In this case intervalToleak == 1 milliseconds
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
-        LeakyBucket limiter = new LeakyBucket(2,6);
+        LeakyBucket limiter = new LeakyBucket(2, 6);
         Thread t = new Thread() {
             public void run() {
                 try {
@@ -34,15 +34,16 @@ public class LeakyBucket {
             }
         };
         t.start();
-        while(true) {
+        while (true) {
             Request req = new Request(System.currentTimeMillis(), limiter.id++);
-            System.out.println("request accepted "+limiter.acceptRequest(req));
-            Thread.sleep(limiter.rand.nextInt(40)+800);
+            System.out.println("request accepted " + limiter.acceptRequest(req));
+            Thread.sleep(limiter.rand.nextInt(40) + 800);
         }
     }
 
     /**
      * Main thread will invoke it
+     *
      * @param req request
      * @return true if accepted else false
      */
@@ -55,14 +56,14 @@ public class LeakyBucket {
      */
     public void process() throws InterruptedException {
         int requestsForProcess = REQUESTSTOPROCESS; //Number of requests to leak
-        while(true) {
-            while(requestsForProcess>0) {
+        while (true) {
+            while (requestsForProcess > 0) {
                 Request req = bucket.peek();
-                if(req!=null) {
-                    System.out.println("id: "+req.id+" add time: "+req.timeMillis+" delay: "+ (System.currentTimeMillis() - req.timeMillis));
+                if (req != null) {
+                    System.out.println("id: " + req.id + " add time: " + req.timeMillis + " delay: " + (System.currentTimeMillis() - req.timeMillis));
                     bucket.poll(); //Leak it
                     requestsForProcess--;
-                }else { //bucket is empty
+                } else { //bucket is empty
                     System.out.println("Bucket is empty");
                     break;
                 }
@@ -76,6 +77,7 @@ public class LeakyBucket {
 class Request {
     final long timeMillis;
     final int id;
+
     Request(long time, int id) {
         this.timeMillis = time;
         this.id = id;
